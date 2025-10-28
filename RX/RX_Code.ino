@@ -17,16 +17,10 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
-int buttonPin = 3;
-int joy1X = A0;
-int joy1Y = A1;
-int joy2X = A2;
-int joy2Y = A3;
-bool buttonState;
-bool prevState;
-
 dcMotor LMotor(2, 4, 5);
 dcMotor RMotor(7, 8, 6);
+
+int xAxis, yAxis;
 
 void setup() {
   //DONT USE PIN13 FOR ANY SENSOR OR ACTUATORS
@@ -92,11 +86,29 @@ void loop() {
     Serial.print(data.joystick1Y);
     Serial.println(")");
 
-    LMotor.setSpeed(data.joystick1X);
-    LMotor.setDirection(false);
-    RMotor.setSpeed(data.joystick1Y);
-    RMotor.setDirection(true);
+    xAxis = analogRead(data.joystick1X) - 512;
+    yAxis = analogRead(data.joystick1Y) - 512;
 
+    int leftPower = y + x;
+    int rightPower = y - x;
+
+    int leftSpeed = map(abs(leftPower), 0, 512, 0, 255);
+    int rightSpeed = map(abs(rightPower), 0, 512, 0, 255);
+
+    if(leftPower >= 0) {
+      LMotor.setDirection(true);
+    } else {
+      LMotor.setDirection(false);
+    }
+
+    if(rightPower >= 0) {
+      RMotor.setDirection(false);
+    } else {
+      RMotor.setDirection(true);
+    }
+
+    LMotor.setSpeed(leftSpeed);
+    RMotor.setSpeed(rightSpeed);
     //all RX stuff above
 
   }
