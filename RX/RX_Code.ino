@@ -21,6 +21,8 @@ dcMotor LMotor(2, 4, 5);
 dcMotor RMotor(7, 8, 6);
 
 int xAxis, yAxis;
+int leftSpeed, rightSpeed;
+int leftPower, rightPower;
 
 void setup() {
   //DONT USE PIN13 FOR ANY SENSOR OR ACTUATORS
@@ -92,8 +94,13 @@ void loop() {
     int leftPower = y + x;
     int rightPower = y - x;
 
-    int leftSpeed = map(abs(leftPower), 0, 512, 0, 255);
-    int rightSpeed = map(abs(rightPower), 0, 512, 0, 255);
+    if(button) {
+      leftSpeed = map(abs(leftPower), 0, 512, 0, 255);
+      rightSpeed = map(abs(rightPower), 0, 512, 0, 255);
+    } else {
+      leftSpeed = map(abs(leftPower), 0, 512, 0, 127);
+      rightSpeed = map(abs(rightPower), 0, 512, 0, 127);
+    }
 
     if(leftPower >= 0) {
       LMotor.setDirection(true);
