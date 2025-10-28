@@ -1,6 +1,6 @@
 **Pins, as defined in RX_Code.ino:**
 
-*Motors correspond to their respective side of the h-bridge, where left is the low-numbered pins.*
+*Motors correspond to their respective side of the h-bridge, where left is the low-numbered pins and the vehicle is viewed from the rear.*
 
 - Left Drive Motor:
     - H-Bridge Pin 1 (ENA): Arduino 5
