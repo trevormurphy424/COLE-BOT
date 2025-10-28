@@ -41,15 +41,13 @@ void setup() {
   pinMode(joy2X, INPUT);
   pinMode(joy2Y, INPUT);
 
-  // WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Transmitter);
-  // WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Receiver);
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Emulator); // one board to rule them all debugging
 }
 
 void loop() {
 
   if (WifiSerial.getPortType() == WifiPortType::Transmitter || WifiSerial.getPortType() == WifiPortType::Emulator) {
-    WifiSerial.autoReconnect();//try and connect
+    WifiSerial.autoReconnect(); //try and connect
 
     data.joystick1X = analogRead(joy1X);
     data.joystick1Y = analogRead(joy1Y);
@@ -73,14 +71,14 @@ void loop() {
     //Tx stuff above
 
 
-    if (!WifiSerial.sendData(data))//check and see if connection is established and data is sent
-      Serial.println("Wifi Send Problem");//oh no it didn't send --> it iwll try and re-connect at the start of the loop
+    if (!WifiSerial.sendData(data)) //check and see if connection is established and data is sent
+      Serial.println("Wifi Send Problem"); //oh no it didn't send --> it will try and re-connect at the start of the loop
 
   }
   
   if ((WifiSerial.getPortType() == WifiPortType::Receiver || WifiSerial.getPortType() == WifiPortType::Emulator) && WifiSerial.checkForData()) {
 
-    data = WifiSerial.getData();//received and unpack data structure
+    data = WifiSerial.getData(); //received and unpack data structure
 
     //all Rx stuff below
     Serial.println("Receiving: " );
