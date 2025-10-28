@@ -10,12 +10,12 @@ struct DataPacket {
   int joystick2X;
   int joystick2Y;  
 
-
 } data;
 
 //gloabl vars are outside datapacket
 
 WifiPort<DataPacket> WifiSerial;
+
 int buttonPin = 3;
 int joy1X = A0;
 int joy1Y = A1;
@@ -36,8 +36,6 @@ void setup() {
   pinMode(joy2Y, INPUT);
 
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Transmitter);
-  // WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Receiver);
-  // WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Emulator); // one board to rule them all debugging
 }
 
 void loop() {
@@ -73,22 +71,14 @@ void loop() {
       Serial.println("Wifi Send Problem");//oh no it didn't send --> it iwll try and re-connect at the start of the loop
 
   }
-
-
   
   if ((WifiSerial.getPortType() == WifiPortType::Receiver || WifiSerial.getPortType() == WifiPortType::Emulator) && WifiSerial.checkForData()) {
 
     data = WifiSerial.getData();//received and unpack data structure
 
     //all Rx stuff below
-    Serial.println("Receiving: " );
-    Serial.print("Button: ");
-    Serial.println(data.button);
-    Serial.print("Joystick 1: (");
-    Serial.print(data.joystick1X);
-    Serial.print(", ");
-    Serial.print(data.joystick1Y);
-    Serial.println(")");
+    Serial.println("Incorrect mode selected. Please change to transmit.");
+    delay(1000);
     //all RX stuff above
 
   }
