@@ -4,7 +4,7 @@
 
 - Left Drive Motor:
     - H-Bridge Pin 1 (ENA): Arduino 5
-    - H-Bridge Pin 2 (IN1): Arduino 2
+    - H-Bridge Pin 2 (IN1): Arduino 3
     - H-Bridge Pin 7 (IN2): Arduino 4
 - Right Drive Motor:
     - H-Bridge Pin 9 (ENB): Arduino 6
