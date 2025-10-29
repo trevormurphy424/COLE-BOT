@@ -60,34 +60,29 @@ void loop() {
     Serial.print(data.joystick1Y);
     Serial.println(")");
 
-    xAxis = analogRead(data.joystick1X) - 512;
-    yAxis = analogRead(data.joystick1Y) - 512;
-
-    int leftPower = y + x;
-    int rightPower = y - x;
-
-    if(button) {
-      leftSpeed = map(abs(leftPower), 0, 512, 0, 255);
-      rightSpeed = map(abs(rightPower), 0, 512, 0, 255);
-    } else {
-      leftSpeed = map(abs(leftPower), 0, 512, 0, 127);
-      rightSpeed = map(abs(rightPower), 0, 512, 0, 127);
-    }
-
-    if(leftPower >= 0) {
+    xAxis = data.joystick1X - 512;
+    yAxis = data.joystick1Y - 512;
+  
+    int L = (int)(((float)yAxis + (float)xAxis) * 255.0 / 512.0);
+    int R = (int)(((float)xAxis - (float)yAxis) * 255.0 / 512.0);
+  
+    L = constrain(L, -255, 255);
+    R = constrain(R, -255, 255);
+  
+    LMotor.setSpeed(abs(L));
+    RMotor.setSpeed(abs(R));
+  
+    if(L >= 0) {
       LMotor.setDirection(true);
     } else {
       LMotor.setDirection(false);
     }
-
-    if(rightPower >= 0) {
+  
+    if(R >= 0) {
       RMotor.setDirection(false);
     } else {
       RMotor.setDirection(true);
     }
-
-    LMotor.setSpeed(leftSpeed);
-    RMotor.setSpeed(rightSpeed);
     //all RX stuff above
 
   }
