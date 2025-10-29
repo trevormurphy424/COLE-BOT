@@ -16,7 +16,7 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
-int buttonPin = 3;
+int buttonPin = 2;
 int joy1X = A0;
 int joy1Y = A1;
 int joy2X = A2;
