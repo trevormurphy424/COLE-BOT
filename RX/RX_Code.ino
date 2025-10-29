@@ -17,7 +17,7 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
-dcMotor LMotor(2, 4, 5);
+dcMotor LMotor(3, 4, 5);
 dcMotor RMotor(7, 8, 6);
 
 int xAxis, yAxis;
