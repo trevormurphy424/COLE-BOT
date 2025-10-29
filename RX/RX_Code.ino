@@ -63,11 +63,11 @@ void loop() {
     xAxis = data.joystick1X - 512;
     yAxis = data.joystick1Y - 512;
   
-    int L = (int)(((float)yAxis + (float)xAxis) * 255.0 / 512.0);
-    int R = (int)(((float)xAxis - (float)yAxis) * 255.0 / 512.0);
+    int L = xAxis + yAxis;
+    int R = xAxis - yAxis;
   
-    L = constrain(L, -255, 255);
-    R = constrain(R, -255, 255);
+    L = map(L, -1023, 1023, -255, 255);
+    R = map(R, -1023, 1023, -255, 255);
   
     LMotor.setSpeed(abs(L));
     RMotor.setSpeed(abs(R));
