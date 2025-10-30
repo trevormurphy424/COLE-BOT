@@ -18,8 +18,8 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
-dcMotor LMotor(3, 4, 5);
-dcMotor RMotor(7, 8, 6);
+dcMotor LMotor(3, 4, 9);
+dcMotor RMotor(7, 8, 10);
 Servo clawServo;
 Servo armServo;
 
@@ -43,8 +43,10 @@ void setup() {
 
   clawServo.write(10);
   clawPos = 10;
+  delay(20);
   armServo.write(70);
   armPos = 70;
+  delay(20);
 
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Receiver);
 }
@@ -75,6 +77,11 @@ void loop() {
     Serial.print(data.joystick1X);
     Serial.print(", ");
     Serial.print(data.joystick1Y);
+    Serial.println(")");
+    Serial.print("Joystick 2: (");
+    Serial.print(data.joystick2X);
+    Serial.print(", ");
+    Serial.print(data.joystick2Y);
     Serial.println(")");
 
     xAxis = data.joystick1X - 512;
@@ -111,14 +118,16 @@ void loop() {
     if(((armPos + armDelta) > 20) && ((armPos + armDelta) < 110)) {
       armPos += armDelta;
       armServo.write(armPos);
+      delay(20);
     }
     if(((clawPos + clawDelta) > 0) && ((clawPos + clawDelta) < 45)) {
       clawPos += clawDelta;
       clawServo.write(clawPos);
+      delay(20);
     }
     //all RX stuff above
 
   }
 
-  delay(100); // update delay after you get it working to be a smaller number like 10ms to account for WiFi transmission overhead
+  delay(10); // update delay after you get it working to be a smaller number like 10ms to account for WiFi transmission overhead
 }
