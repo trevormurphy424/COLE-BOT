@@ -1,3 +1,4 @@
+#include <Servo.h>
 #include "WifiPort2.h"
 #include "motor.h"
 
@@ -19,15 +20,31 @@ WifiPort<DataPacket> WifiSerial;
 
 dcMotor LMotor(3, 4, 5);
 dcMotor RMotor(7, 8, 6);
+Servo clawServo;
+Servo armServo;
 
 int xAxis, yAxis;
 int leftSpeed, rightSpeed;
 int leftPower, rightPower;
+int armDelta, clawDelta;
+int armPos, clawPos;
+
+// pin definitions
+const short unsigned CLAW_SERVO_PIN = 6;
+const short unsigned ARM_SERVO_PIN = 5;
 
 void setup() {
   //DONT USE PIN13 FOR ANY SENSOR OR ACTUATORS
 
   Serial.begin(115200);  //preferred transmission rate for Arduino UNO R4
+
+  clawServo.attach(CLAW_SERVO_PIN);
+  armServo.attach(ARM_SERVO_PIN);
+
+  clawServo.write(10);
+  clawPos = 10;
+  armServo.write(70);
+  armPos = 70;
 
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Receiver);
 }
@@ -82,6 +99,22 @@ void loop() {
       RMotor.setDirection(false);
     } else {
       RMotor.setDirection(true);
+    }
+
+    armDelta = map(data.joystick2X, 0, 1023, -6, 6);
+    clawDelta = map(data.joystick2Y, 0, 1023, -6, 6);
+
+    Serial.print(armDelta);
+    Serial.print(" ");
+    Serial.println(clawDelta);
+
+    if(((armPos + armDelta) > 20) && ((armPos + armDelta) < 110)) {
+      armPos += armDelta;
+      armServo.write(armPos);
+    }
+    if(((clawPos + clawDelta) > 0) && ((clawPos + clawDelta) < 45)) {
+      clawPos += clawDelta;
+      clawServo.write(clawPos);
     }
     //all RX stuff above
 
