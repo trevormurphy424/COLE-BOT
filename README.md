@@ -13,14 +13,14 @@ MEGN200 Group Project
 
  ## Receiver Pins
  - Left Drive Motor:
-    - H-Bridge Pin 1 (ENA): Arduino 5
+    - H-Bridge Pin 1 (ENA): Arduino 9
     - H-Bridge Pin 2 (IN1): Arduino 3
     - H-Bridge Pin 7 (IN2): Arduino 4
 - Right Drive Motor:
-    - H-Bridge Pin 9 (ENB): Arduino 6
+    - H-Bridge Pin 9 (ENB): Arduino 10
     - H-Bridge Pin 10 (IN3): Arduino 7
     - H-Bridge Pin 15 (IN4): Arduino 8
 - Claw Arm Servo:
-    - PWM: Arduino 9
+    - PWM: Arduino 5
 - Claw Servo:
-    - PWM: Arduino 10 
+    - PWM: Arduino 6
