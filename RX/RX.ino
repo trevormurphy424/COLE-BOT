@@ -18,6 +18,9 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
+// debug
+const bool debug = true;
+
 // pins
 const short motor1PWM = 6,
             motor1DIR1 = 5, 
@@ -28,6 +31,12 @@ const short motor1PWM = 6,
             CLAW_SERVO_PIN = A1,
             ARM_SERVO_PIN = A0;
 
+// max/min constraints
+const int ARM_MIN = 60,
+          ARM_MAX = 130,
+          CLAW_MIN = 0,
+          CLAW_MAX = 70;
+
 dcMotor LMotor(motor1DIR1, motor1DIR2, motor1PWM);
 dcMotor RMotor(motor2DIR1, motor2DIR2, motor2PWM);
 Servo clawServo;
@@ -36,6 +45,7 @@ Servo armServo;
 int xAxis, yAxis;
 int leftSpeed, rightSpeed;
 int leftPower, rightPower;
+int armJoystick, clawJoystick;
 int armDelta, clawDelta;
 int armPos, clawPos;
 
@@ -98,9 +108,17 @@ void loop() {
   
     L = map(L, -1023, 1023, -255, 255);
     R = map(R, -1023, 1023, -255, 255);
-  
-    LMotor.setSpeed(abs(L));
-    RMotor.setSpeed(abs(R));
+
+    if(abs(L) > 15) {
+      LMotor.setSpeed(abs(L));
+    } else {
+      LMotor.setSpeed(0);
+    }
+    if(abs(R) > 15) {
+      RMotor.setSpeed(abs(R));
+    } else {
+      RMotor.setSpeed(0);
+    }
   
     if(L >= 0) {
       LMotor.setDirection(true);
@@ -114,19 +132,35 @@ void loop() {
       RMotor.setDirection(true);
     }
 
-    armDelta = map(data.joystick2X, 0, 1023, -6, 6);
-    clawDelta = map(data.joystick2Y, 0, 1023, -6, 6);
+    armJoystick = data.joystick2X - 512;
+    clawJoystick = data.joystick2Y - 512;
 
-    Serial.print(armDelta);
-    Serial.print(" ");
-    Serial.println(clawDelta);
+    if(abs(armJoystick) > 15) {
+      armDelta = map(armJoystick, -513, 513, -6, 6);
+    } else {
+      armDelta = 0;
+    }
+    if(abs(clawJoystick) > 15) {
+      clawDelta = map(clawJoystick, -513, 513, -6, 6);
+    } else {
+      clawDelta = 0;
+    }
 
-    if(((armPos + armDelta) > 20) && ((armPos + armDelta) < 110)) {
+    if(debug){
+      Serial.print(armDelta);
+      Serial.print(" ");
+      Serial.println(clawDelta);
+      Serial.print(armPos);
+      Serial.print(" ");
+      Serial.println(clawPos);
+    }
+
+    if(((armPos + armDelta) > ARM_MIN) && ((armPos + armDelta) < ARM_MAX)) {
       armPos += armDelta;
       armServo.write(armPos);
       delay(20);
     }
-    if(((clawPos + clawDelta) > 0) && ((clawPos + clawDelta) < 45)) {
+    if(((clawPos + clawDelta) > CLAW_MIN) && ((clawPos + clawDelta) < CLAW_MAX)) {
       clawPos += clawDelta;
       clawServo.write(clawPos);
       delay(20);
