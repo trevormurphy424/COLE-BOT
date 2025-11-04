@@ -18,8 +18,18 @@ struct DataPacket {
 
 WifiPort<DataPacket> WifiSerial;
 
-dcMotor LMotor(3, 4, 9);
-dcMotor RMotor(7, 8, 10);
+// pins
+const short motor1PWM = 6,
+            motor1DIR1 = 5, 
+            motor1DIR2 = 7,
+            motor2PWM = 3,
+            motor2DIR1 = 2,
+            motor2DIR2 = 4,
+            CLAW_SERVO_PIN = A1,
+            ARM_SERVO_PIN = A0;
+
+dcMotor LMotor(motor1DIR1, motor1DIR2, motor1PWM);
+dcMotor RMotor(motor2DIR1, motor2DIR2, motor2PWM);
 Servo clawServo;
 Servo armServo;
 
@@ -28,10 +38,6 @@ int leftSpeed, rightSpeed;
 int leftPower, rightPower;
 int armDelta, clawDelta;
 int armPos, clawPos;
-
-// pin definitions
-const short unsigned CLAW_SERVO_PIN = 6;
-const short unsigned ARM_SERVO_PIN = 5;
 
 void setup() {
   //DONT USE PIN13 FOR ANY SENSOR OR ACTUATORS
