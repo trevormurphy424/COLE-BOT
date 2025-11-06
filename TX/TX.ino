@@ -83,5 +83,5 @@ void loop() {
 
   }
 
-  delay(100); // update delay after you get it working to be a smaller number like 10ms to account for WiFi transmission overhead
+  delay(10); // update delay after you get it working to be a smaller number like 10ms to account for WiFi transmission overhead
 }
