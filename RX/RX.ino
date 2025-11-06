@@ -31,11 +31,15 @@ const short motor1PWM = 6,
             CLAW_SERVO_PIN = A1,
             ARM_SERVO_PIN = A0;
 
-// max/min constraints
+// max/min constraints (currently configured for 17)
 const int ARM_MIN = 60,
           ARM_MAX = 130,
           CLAW_MIN = 0,
           CLAW_MAX = 70;
+
+// movement speeds
+int clawArmSpeed[2] = {-3, 3};
+int movementSpeed[2] = {-255, 255};
 
 dcMotor LMotor(motor1DIR1, motor1DIR2, motor1PWM);
 dcMotor RMotor(motor2DIR1, motor2DIR2, motor2PWM);
@@ -100,14 +104,26 @@ void loop() {
     Serial.print(data.joystick2Y);
     Serial.println(")");
 
+    if(data.button) {
+      movementSpeed[0] = -127;
+      movementSpeed[1] = 127;
+      clawArmSpeed[0] = -3;
+      clawArmSpeed[1] = 3;
+    } else {
+      movementSpeed[0] = -255;
+      movementSpeed[1] = 255;
+      clawArmSpeed[0] = -6;
+      clawArmSpeed[1] = 6;
+    }
+
     xAxis = data.joystick1X - 512;
     yAxis = data.joystick1Y - 512;
   
     int L = xAxis + yAxis;
     int R = xAxis - yAxis;
   
-    L = map(L, -1023, 1023, -255, 255);
-    R = map(R, -1023, 1023, -255, 255);
+    L = map(L, -1023, 1023, movementSpeed[0], movementSpeed[1]);
+    R = map(R, -1023, 1023, movementSpeed[0], movementSpeed[1]);
 
     if(abs(L) > 15) {
       LMotor.setSpeed(abs(L));
@@ -136,12 +152,12 @@ void loop() {
     clawJoystick = data.joystick2Y - 512;
 
     if(abs(armJoystick) > 15) {
-      armDelta = map(armJoystick, -513, 513, -6, 6);
+      armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]);
     } else {
       armDelta = 0;
     }
     if(abs(clawJoystick) > 15) {
-      clawDelta = map(clawJoystick, -513, 513, -6, 6);
+      clawDelta = map(clawJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]);
     } else {
       clawDelta = 0;
     }
