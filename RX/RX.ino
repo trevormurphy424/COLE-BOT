@@ -2,8 +2,7 @@
 #include "WifiPort2.h"
 #include "motor.h"
 
-// A structure, similar to our servo and stepper motors, but this one conatins variables to be transmitted
-// Any variable you want to transmit/recieve must be initalized in the DataPacket structure
+// Data packet to be transmitted over WiFi
 struct DataPacket {
 
   bool button = false;
@@ -14,12 +13,11 @@ struct DataPacket {
 
 } data;
 
-//gloabl vars are outside datapacket
-
+// build WiFi interface
 WifiPort<DataPacket> WifiSerial;
 
 // debug
-const bool debug = true;
+const bool debug = false;
 
 // pins
 const short motor1PWM = 6,
@@ -41,26 +39,30 @@ const int ARM_MIN = 60,
 int clawArmSpeed[2] = {-3, 3};
 int movementSpeed[2] = {-255, 255};
 
+// assemble motor objects
 dcMotor LMotor(motor1DIR1, motor1DIR2, motor1PWM);
 dcMotor RMotor(motor2DIR1, motor2DIR2, motor2PWM);
 Servo clawServo;
 Servo armServo;
 
-int xAxis, yAxis;
-int leftSpeed, rightSpeed;
-int leftPower, rightPower;
-int armJoystick, clawJoystick;
-int armDelta, clawDelta;
-int armPos, clawPos;
+// initialize other necessary variables
+int xAxis, yAxis, 
+    leftSpeed, rightSpeed, 
+    leftPower, rightPower, 
+    armJoystick, clawJoystick, 
+    armDelta, clawDelta, 
+    armPos, clawPos;
 
 void setup() {
   //DONT USE PIN13 FOR ANY SENSOR OR ACTUATORS
 
   Serial.begin(115200);  //preferred transmission rate for Arduino UNO R4
 
+  // attach pins to servos
   clawServo.attach(CLAW_SERVO_PIN);
   armServo.attach(ARM_SERVO_PIN);
 
+  // set servos to default positions
   clawServo.write(10);
   clawPos = 10;
   delay(20);
@@ -68,42 +70,48 @@ void setup() {
   armPos = 70;
   delay(20);
 
+  // begin receive on WiFi network
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Receiver);
 }
 
 void loop() {
 
   if (WifiSerial.getPortType() == WifiPortType::Transmitter || WifiSerial.getPortType() == WifiPortType::Emulator) {
-    WifiSerial.autoReconnect();//try and connect
+    // try and connect
+    WifiSerial.autoReconnect();
 
-    //Tx stuff below
+    // incorrect mode error
     Serial.println("Incorrect mode selected. Please select receive.");
-    //Tx stuff above
 
-    if (!WifiSerial.sendData(data))//check and see if connection is established and data is sent
-      Serial.println("Wifi Send Problem");//oh no it didn't send --> it iwll try and re-connect at the start of the loop
+    //check and see if connection is established and data is sent
+    if (!WifiSerial.sendData(data))
+      Serial.println("Wifi Send Problem");
 
   }
   
   if ((WifiSerial.getPortType() == WifiPortType::Receiver || WifiSerial.getPortType() == WifiPortType::Emulator) && WifiSerial.checkForData()) {
 
-    data = WifiSerial.getData();//received and unpack data structure
+    //received and unpack data structure
+    data = WifiSerial.getData();
 
-    //all Rx stuff below
-    Serial.println("Receiving: " );
-    Serial.print("Button: ");
-    Serial.println(data.button);
-    Serial.print("Joystick 1: (");
-    Serial.print(data.joystick1X);
-    Serial.print(", ");
-    Serial.print(data.joystick1Y);
-    Serial.println(")");
-    Serial.print("Joystick 2: (");
-    Serial.print(data.joystick2X);
-    Serial.print(", ");
-    Serial.print(data.joystick2Y);
-    Serial.println(")");
+    // RX debug
+    if(debug) {
+      Serial.println("Receiving: " );
+      Serial.print("Button: ");
+      Serial.println(data.button);
+      Serial.print("Joystick 1: (");
+      Serial.print(data.joystick1X);
+      Serial.print(", ");
+      Serial.print(data.joystick1Y);
+      Serial.println(")");
+      Serial.print("Joystick 2: (");
+      Serial.print(data.joystick2X);
+      Serial.print(", ");
+      Serial.print(data.joystick2Y);
+      Serial.println(")");
+    }
 
+    // map values depending on button state (if button pressed, move slower)
     if(data.button) {
       movementSpeed[0] = -127;
       movementSpeed[1] = 127;
@@ -116,52 +124,47 @@ void loop() {
       clawArmSpeed[1] = 6;
     }
 
+    // get movement axis data
     xAxis = data.joystick1X - 512;
     yAxis = data.joystick1Y - 512;
-  
+
+    // configure for tank steering
     int L = xAxis + yAxis;
     int R = xAxis - yAxis;
-  
-    L = map(L, -1023, 1023, movementSpeed[0], movementSpeed[1]);
-    R = map(R, -1023, 1023, movementSpeed[0], movementSpeed[1]);
 
-    if(abs(L) > 15) {
-      LMotor.setSpeed(abs(L));
-    } else {
-      LMotor.setSpeed(0);
-    }
-    if(abs(R) > 15) {
-      RMotor.setSpeed(abs(R));
-    } else {
-      RMotor.setSpeed(0);
-    }
+    // constrain values (so that turning isn't too fast)
+    // ** may need to be removed pending performance
+    L = constrain(L, -512, 512);
+    R = constrain(R, -512, 512);
   
-    if(L >= 0) {
-      LMotor.setDirection(true);
-    } else {
-      LMotor.setDirection(false);
-    }
-  
-    if(R >= 0) {
-      RMotor.setDirection(false);
-    } else {
-      RMotor.setDirection(true);
-    }
+    // map values to a movement speed threshold
+    // ** if above is removed, change 512 to 1023
+    L = map(L, -512, 512, movementSpeed[0], movementSpeed[1]);
+    R = map(R, -512, 512, movementSpeed[0], movementSpeed[1]);
 
+    // check for deadzone, set motor speeds
+    if(abs(L) > 15) { LMotor.setSpeed(abs(L)); } 
+    else { LMotor.setSpeed(0); }
+    if(abs(R) > 15) { RMotor.setSpeed(abs(R)); }
+    else { RMotor.setSpeed(0); }
+  
+    // set motor directions (true = cw)
+    if(L >= 0) { LMotor.setDirection(true); }
+    else { LMotor.setDirection(false); }
+    if(R >= 0) { RMotor.setDirection(false); }
+    else { RMotor.setDirection(true); }
+
+    // get claw/arm joystick axis data
     armJoystick = data.joystick2X - 512;
     clawJoystick = data.joystick2Y - 512;
 
-    if(abs(armJoystick) > 15) {
-      armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]);
-    } else {
-      armDelta = 0;
-    }
-    if(abs(clawJoystick) > 15) {
-      clawDelta = map(clawJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]);
-    } else {
-      clawDelta = 0;
-    }
+    // check for deadzones and map servo deltas
+    if(abs(armJoystick) > 15) { armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
+    else { armDelta = 0; }
+    if(abs(clawJoystick) > 15) { clawDelta = map(clawJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
+    else { clawDelta = 0; }
 
+    // debug for servo positions/delta
     if(debug){
       Serial.print(armDelta);
       Serial.print(" ");
@@ -171,6 +174,7 @@ void loop() {
       Serial.println(clawPos);
     }
 
+    // check if servos in bounds, move arm +- delta
     if(((armPos + armDelta) > ARM_MIN) && ((armPos + armDelta) < ARM_MAX)) {
       armPos += armDelta;
       armServo.write(armPos);
@@ -181,9 +185,8 @@ void loop() {
       clawServo.write(clawPos);
       delay(20);
     }
-    //all RX stuff above
 
   }
 
-  delay(10); // update delay after you get it working to be a smaller number like 10ms to account for WiFi transmission overhead
+  delay(10); // WiFi transmittion delay
 }
