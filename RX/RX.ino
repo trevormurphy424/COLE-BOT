@@ -156,7 +156,7 @@ void loop() {
 
     // get claw/arm joystick axis data
     armJoystick = -1 * (data.joystick2X - 512);
-    clawJoystick = -1 * (data.joystick2Y - 512);
+    clawJoystick = (data.joystick2Y - 512);
 
     // check for deadzones and map servo deltas
     if(abs(armJoystick) > 10) { armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
