@@ -22,7 +22,9 @@ int buttonPin = 2,
     joy1X = A0,
     joy1Y = A1,
     joy2X = A2,
-    joy2Y = A3;
+    joy2Y = A3,
+    joy2Power = 3;
+
 
 // button state variables
 bool  buttonState,
@@ -39,6 +41,9 @@ void setup() {
   pinMode(joy1Y, INPUT);
   pinMode(joy2X, INPUT);
   pinMode(joy2Y, INPUT);
+  pinMode(joy2Power, OUTPUT);
+
+  digitalWrite(joy2Power, HIGH);
 
   // begin transmit on WiFi network 
   WifiSerial.begin("group88", "superSecurePassword", WifiPortType::Transmitter);
@@ -93,5 +98,5 @@ void loop() {
 
   }
 
-  delay(10); // WiFi transmission overhead delay
+  delay(100); // WiFi transmission overhead delay
 }
