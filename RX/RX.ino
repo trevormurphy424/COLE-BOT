@@ -125,12 +125,12 @@ void loop() {
     }
 
     // get movement axis data
-    xAxis = data.joystick1X - 512;
-    yAxis = data.joystick1Y - 512;
+    xAxis = -1 * (data.joystick1X - 512);
+    yAxis = -1 * (data.joystick1Y - 512);
 
     // configure for tank steering
-    int L = xAxis + yAxis;
-    int R = xAxis - yAxis;
+    int L = xAxis - yAxis;
+    int R = xAxis + yAxis;
 
     // constrain values (so that turning isn't too fast)
     // ** may need to be removed pending performance
@@ -143,25 +143,25 @@ void loop() {
     R = map(R, -512, 512, movementSpeed[0], movementSpeed[1]);
 
     // check for deadzone, set motor speeds
-    if(abs(L) > 15) { LMotor.setSpeed(abs(L)); } 
+    if(abs(L) > 10) { LMotor.setSpeed(abs(L)); } 
     else { LMotor.setSpeed(0); }
-    if(abs(R) > 15) { RMotor.setSpeed(abs(R)); }
+    if(abs(R) > 10) { RMotor.setSpeed(abs(R)); }
     else { RMotor.setSpeed(0); }
   
     // set motor directions (true = cw)
-    if(L >= 0) { LMotor.setDirection(true); }
-    else { LMotor.setDirection(false); }
-    if(R >= 0) { RMotor.setDirection(false); }
-    else { RMotor.setDirection(true); }
+    if(L >= 0) { LMotor.setDirection(false); }
+    else { LMotor.setDirection(true); }
+    if(R >= 0) { RMotor.setDirection(true); }
+    else { RMotor.setDirection(false); }
 
     // get claw/arm joystick axis data
-    armJoystick = data.joystick2X - 512;
-    clawJoystick = data.joystick2Y - 512;
+    armJoystick = -1 * (data.joystick2X - 512);
+    clawJoystick = -1 * (data.joystick2Y - 512);
 
     // check for deadzones and map servo deltas
-    if(abs(armJoystick) > 15) { armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
+    if(abs(armJoystick) > 10) { armDelta = map(armJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
     else { armDelta = 0; }
-    if(abs(clawJoystick) > 15) { clawDelta = map(clawJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
+    if(abs(clawJoystick) > 10) { clawDelta = map(clawJoystick, -513, 513, clawArmSpeed[0], clawArmSpeed[1]); }
     else { clawDelta = 0; }
 
     // debug for servo positions/delta
